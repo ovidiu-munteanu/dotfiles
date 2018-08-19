@@ -1,0 +1,78 @@
+# ~/.bashrc_om
+
+# Include global definitions if they exist
+if [ -f /etc/*bashrc ]; then
+	. /etc/*bashrc
+fi
+
+# Include .bashrc if it exists
+if [ -f "$HOME/.bashrc" ]; then
+		. "$HOME/.bashrc"
+fi
+
+# Fix mkdir command has wrong permissions
+if grep -q Microsoft /proc/version; then
+  if [ "0022" == '0000' ]; then
+    umask 0022
+  fi
+fi
+
+parse_git_branch(){
+	git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
+} 
+
+branch_color(){
+  if [[ $(parse_git_branch) = *'master'* ]]; then 
+    echo 31
+  else 
+    echo 36
+  fi
+}
+
+# If not running interactively, don't do anything
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+
+# Set custom prompt
+PS1=
+
+# Only include my username if it's not one I expect.
+if [[ ! ( $(whoami) =~ (^ovidiu$|^Ovidiu$|^omunteanu$|^'Ovidiu Munteanu'$) ) ]]; then
+	# Username in red if root, light magenta otherwise
+	ucolor=$(if [[ $(id -u) -eq 0 ]]; then echo 31; else echo 95; fi)
+	PS1+='\[\e[0;'"$ucolor"'m\]\u@'
+fi
+
+# Include current host
+PS1+='\[\e[1;'32'm\]\h\[\e[1;37m\]:'
+
+# Include current path in full
+PS1+='\[\e[0;'33'm\]`pwd`/'
+
+# Include current branch if inside git repository
+PS1+='\[\033[`branch_color`m\]`parse_git_branch`'
+
+# Use '>>' as cursor symbol
+PS1+='\n\[\e[1;'36'm\]>>\[\e[0m\] '
+
+# Use arrow keys for searching in the history.
+bind '"\e[A":history-search-backward'
+bind '"\e[B":history-search-forward'
+
+# Remember an incredible amount of commands in the history.
+export HISTSIZE=1000000
+export HISTFILESIZE=1000000000
+
+export HISTCONTROL=ignoredups:erasedups
+shopt -s histappend
+export PROMPT_COMMAND="history -n; history -w; history -c; history -r; $PROMPT_COMMAND"  
+
+# Set default editor to be used by svn
+export EDITOR=nano
+
+# Set local domains so no need to enter full address
+# I took these out as they were my company's internal domains so probably not a
+# good idea to share them.
+# export LOCALDOMAIN=""

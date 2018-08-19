@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+set -x
+
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+backup() {
+	directory=$(dirname $1)
+	file_name=$(basename $1)
+	
+	backups=$(find "${directory}" -maxdepth 1 -type f -name "${file_name}.backup*" | wc -l)
+
+	backup_extension=".backup"
+
+	if [[ $backups > 0 ]]; then
+		backup_extension=${backup_extension}${backups}
+	fi
+
+	cp "$1" "$1${backup_extension}"
+	
+	if $2; then
+		rm $1
+	fi
+}
+
+backup_bash_files() {
+	bash_profile="$HOME/.bash_profile"
+	bash_logout="$HOME/.bash_logout"
+	if [[ -f "${bash_profile}" ]]; then
+		backup "${bash_profile}" true
+	fi
+	if [[ -f "${bash_logout}" ]]; then
+		backup "${bash_logout}" true
+	fi
+}
+
+link_file() {
+	directory=$(dirname $2)
+	
+	if [[ -d "${directory}" ]]; then
+		if [[ -f "$2" ]]; then
+			backup "$2" true
+		elif [[ -L "$2" ]]; then
+			unlink "$2"
+		fi
+		ln -sfn "$(realpath $1)" "$2"
+	fi
+}
+
+main() {
+	backup_bash_files
+	link_file "$root/.bashrc" "$HOME/.bashrc"
+	link_file "$root/.bash_aliases" "$HOME/.bash_aliases"
+	link_file "$root/.bashrc_om" "$HOME/.bashrc_om"
+	link_file "$root/.profile" "$HOME/.profile"
+	link_file "$root/.tmux.conf" "$HOME/.tmux.conf"
+	link_file "$root/svn_config" "$HOME/.subversion/config"
+	touch "$HOME/.hushlogin"
+}
+
+main "$@"
+
+set +x

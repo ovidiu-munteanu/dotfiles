@@ -1,0 +1,22 @@
+[auth]
+# store-passwords = yes
+# store-auth-creds = yes
+
+[miscellany]
+global-ignores =
+  *.class
+  *.iml
+  *.mo
+  *.o
+  *.pyc
+  *.swo
+  *.swp
+  *~
+  .ctrlp
+  .idea
+  .ropeproject
+  .vagrant
+  bower_components
+  node_modules
+  npm-debug.log
+  __pycache__
