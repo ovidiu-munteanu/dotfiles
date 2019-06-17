@@ -22,7 +22,7 @@ parse_git_branch(){
 } 
 
 branch_color(){
-  if [[ $(parse_git_branch) = *'master'* ]]; then 
+  if [[ $(parse_git_branch) = *'(master)'* ]]; then 
     echo 31
   else 
     echo 36
