@@ -115,10 +115,3 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
-
-# Fix mkdir command has wrong permissions
-if grep -q Microsoft /proc/version; then
-  if [ "$(umask)" == "0000" ]; then
-    umask 0022
-  fi
-fi

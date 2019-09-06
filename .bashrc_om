@@ -11,20 +11,22 @@ if [ -f "$HOME/.bashrc" ]; then
 fi
 
 # Fix mkdir command has wrong permissions
-if grep -q Microsoft /proc/version; then
-  if [ "0022" == '0000' ]; then
-    umask 0022
+if [[ -f /proc/version ]]; then
+  if grep -q Microsoft /proc/version; then
+    if [ "$(umask)" == "0000" ]; then
+      umask 0022
+    fi
   fi
 fi
 
 parse_git_branch(){
 	git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
-} 
+}
 
 branch_color(){
-  if [[ $(parse_git_branch) = *'(master)'* ]]; then 
+  if [[ $(parse_git_branch) = *'(master)'* ]]; then
     echo 31
-  else 
+  else
     echo 36
   fi
 }
@@ -39,7 +41,7 @@ esac
 PS1=
 
 # Only include my username if it's not one I expect.
-if [[ ! ( $(whoami) =~ (^ovidiu$|^Ovidiu$|^omunteanu$|^'Ovidiu Munteanu'$) ) ]]; then
+if [[ ! ( $(whoami) =~ (^ovidiu$|^Ovidiu$|^'ovidiu.munteanu'$|^'Ovidiu Munteanu'$) ) ]]; then
 	# Username in red if root, light magenta otherwise
 	ucolor=$(if [[ $(id -u) -eq 0 ]]; then echo 31; else echo 95; fi)
 	PS1+='\[\e[0;'"$ucolor"'m\]\u@'
@@ -67,7 +69,12 @@ export HISTFILESIZE=1000000000
 
 export HISTCONTROL=ignoredups:erasedups
 shopt -s histappend
-export PROMPT_COMMAND="history -n; history -w; history -c; history -r; $PROMPT_COMMAND"  
+export PROMPT_COMMAND="history -n; history -w; history -c; history -r; $PROMPT_COMMAND"
+
+# Enable colours
+export TERM="screen-256color"
+export CLICOLOR=1
+export LSCOLORS=GxFxCxDxBxegedabagaced
 
 # Set default editor to be used by svn
 export EDITOR=nano
